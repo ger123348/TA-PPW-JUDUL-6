@@ -1,0 +1,174 @@
+{
+  "cities": [
+    {
+      "name": "Bandar Lampung",
+      "current": {
+        "temperature": 29,
+        "humidity": 68,
+        "wind": 16,
+        "condition": "Cloudy",
+        "icon": "☁"
+      },
+      "forecast": [
+        { "day": "Mon", "min": 24, "max": 30, "condition": "Rain" },
+        { "day": "Tue", "min": 25, "max": 31, "condition": "Thunderstorm" },
+        { "day": "Wed", "min": 25, "max": 32, "condition": "Sunny" },
+        { "day": "Thu", "min": 26, "max": 32, "condition": "Cloudy" },
+        { "day": "Fri", "min": 24, "max": 30, "condition": "Rain" }
+      ]
+    },
+    {
+      "name": "Pekanbaru",
+      "current": {
+        "temperature": 31,
+        "humidity": 61,
+        "wind": 14,
+        "condition": "Sunny",
+        "icon": "☀"
+      },
+      "forecast": [
+        { "day": "Mon", "min": 25, "max": 33, "condition": "Sunny" },
+        { "day": "Tue", "min": 26, "max": 34, "condition": "Sunny" },
+        { "day": "Wed", "min": 26, "max": 33, "condition": "Cloudy" },
+        { "day": "Thu", "min": 27, "max": 34, "condition": "Sunny" },
+        { "day": "Fri", "min": 25, "max": 32, "condition": "Rain" }
+      ]
+    },
+    {
+      "name": "Jakarta",
+      "current": {
+        "temperature": 30,
+        "humidity": 72,
+        "wind": 12,
+        "condition": "Rain",
+        "icon": "🌧"
+      },
+      "forecast": [
+        { "day": "Mon", "min": 25, "max": 31, "condition": "Cloudy" },
+        { "day": "Tue", "min": 26, "max": 32, "condition": "Rain" },
+        { "day": "Wed", "min": 25, "max": 33, "condition": "Cloudy" },
+        { "day": "Thu", "min": 24, "max": 32, "condition": "Rain" },
+        { "day": "Fri", "min": 25, "max": 31, "condition": "Thunderstorm" }
+      ]
+    },
+    {
+      "name": "Bandung",
+      "current": {
+        "temperature": 22,
+        "humidity": 75,
+        "wind": 10,
+        "condition": "Rain",
+        "icon": "🌧"
+      },
+      "forecast": [
+        { "day": "Mon", "min": 18, "max": 23, "condition": "Rain" },
+        { "day": "Tue", "min": 19, "max": 24, "condition": "Rain" },
+        { "day": "Wed", "min": 20, "max": 25, "condition": "Cloudy" },
+        { "day": "Thu", "min": 18, "max": 24, "condition": "Rain" },
+        { "day": "Fri", "min": 17, "max": 23, "condition": "Rain" }
+      ]
+    },
+    {
+      "name": "Surabaya",
+      "current": {
+        "temperature": 33,
+        "humidity": 56,
+        "wind": 12,
+        "condition": "Sunny",
+        "icon": "☀"
+      },
+      "forecast": [
+        { "day": "Mon", "min": 27, "max": 35, "condition": "Sunny" },
+        { "day": "Tue", "min": 28, "max": 36, "condition": "Sunny" },
+        { "day": "Wed", "min": 28, "max": 35, "condition": "Cloudy" },
+        { "day": "Thu", "min": 29, "max": 36, "condition": "Sunny" },
+        { "day": "Fri", "min": 27, "max": 34, "condition": "Rain" }
+      ]
+    },
+    {
+      "name": "Semarang",
+      "current": {
+        "temperature": 31,
+        "humidity": 69,
+        "wind": 15,
+        "condition": "Cloudy",
+        "icon": "☁"
+      },
+      "forecast": [
+        { "day": "Mon", "min": 26, "max": 32, "condition": "Cloudy" },
+        { "day": "Tue", "min": 25, "max": 31, "condition": "Rain" },
+        { "day": "Wed", "min": 26, "max": 32, "condition": "Sunny" },
+        { "day": "Thu", "min": 27, "max": 33, "condition": "Cloudy" },
+        { "day": "Fri", "min": 25, "max": 30, "condition": "Rain" }
+      ]
+    },
+    {
+      "name": "Medan",
+      "current": {
+        "temperature": 32,
+        "humidity": 74,
+        "wind": 13,
+        "condition": "Thunderstorm",
+        "icon": "⛈"
+      },
+      "forecast": [
+        { "day": "Mon", "min": 26, "max": 33, "condition": "Rain" },
+        { "day": "Tue", "min": 27, "max": 34, "condition": "Cloudy" },
+        { "day": "Wed", "min": 26, "max": 33, "condition": "Thunderstorm" },
+        { "day": "Thu", "min": 26, "max": 32, "condition": "Rain" },
+        { "day": "Fri", "min": 27, "max": 33, "condition": "Rain" }
+      ]
+    },
+    {
+      "name": "Makassar",
+      "current": {
+        "temperature": 30,
+        "humidity": 70,
+        "wind": 18,
+        "condition": "Windy",
+        "icon": "🌬"
+      },
+      "forecast": [
+        { "day": "Mon", "min": 26, "max": 31, "condition": "Windy" },
+        { "day": "Tue", "min": 26, "max": 32, "condition": "Cloudy" },
+        { "day": "Wed", "min": 27, "max": 32, "condition": "Rain" },
+        { "day": "Thu", "min": 27, "max": 31, "condition": "Rain" },
+        { "day": "Fri", "min": 26, "max": 32, "condition": "Cloudy" }
+      ]
+    },
+    {
+      "name": "Palembang",
+      "current": {
+        "temperature": 31,
+        "humidity": 73,
+        "wind": 14,
+        "condition": "Rain",
+        "icon": "🌧"
+      },
+      "forecast": [
+        { "day": "Mon", "min": 25, "max": 32, "condition": "Rain" },
+        { "day": "Tue", "min": 26, "max": 33, "condition": "Rain" },
+        { "day": "Wed", "min": 26, "max": 34, "condition": "Cloudy" },
+        { "day": "Thu", "min": 27, "max": 33, "condition": "Rain" },
+        { "day": "Fri", "min": 26, "max": 32, "condition": "Thunderstorm" }
+      ]
+    },
+    {
+      "name": "Yogyakarta",
+      "current": {
+        "temperature": 28,
+        "humidity": 80,
+        "wind": 10,
+        "condition": "Cloudy",
+        "icon": "☁"
+      },
+      "forecast": [
+        { "day": "Mon", "min": 23, "max": 30, "condition": "Cloudy" },
+        { "day": "Tue", "min": 24, "max": 31, "condition": "Rain" },
+        { "day": "Wed", "min": 25, "max": 30, "condition": "Rain" },
+        { "day": "Thu", "min": 23, "max": 30, "condition": "Cloudy" },
+        { "day": "Fri", "min": 22, "max": 29, "condition": "Rain" }
+      ]
+    }
+  ]
+}

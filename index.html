@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Weather Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="light">
+  <div class="app">
+    <header class="app-header">
+      <h1>Weather Dashboard</h1>
+
+      <div class="controls">
+        <!-- Search + autocomplete -->
+        <div class="search-group">
+          <input
+            type="text"
+            id="cityInput"
+            placeholder="Cari kota (mis. Bandar Lampung)"
+            list="citySuggestions"
+          />
+          <datalist id="citySuggestions">
+            <option value="Bandar Lampung"></option>
+            <option value="Jakarta"></option>
+            <option value="Bandung"></option>
+            <option value="Surabaya"></option>
+            <option value="Yogyakarta"></option>
+            <option value="Medan"></option>
+            <option value="Palembang"></option>
+            <option value="Denpasar"></option>
+          </datalist>
+          <button id="searchBtn">Cari</button>
+        </div>
+
+        <!-- Toggle C / F -->
+        <div class="toggle-group">
+          <span>Unit:</span>
+          <button id="unitToggle" class="toggle-btn">
+            °C
+          </button>
+        </div>
+
+        <!-- Dark / light toggle -->
+        <div class="toggle-group">
+          <span>Tema:</span>
+          <button id="themeToggle" class="toggle-btn">
+            🌞 Light
+          </button>
+        </div>
+
+        <!-- Refresh -->
+        <button id="refreshBtn" class="refresh-btn">
+          🔄 Refresh
+        </button>
+      </div>
+    </header>
+
+    <!-- Loading indicator -->
+    <div id="loading" class="loading hidden">
+      ⏳ Mengambil data cuaca...
+    </div>
+
+    <!-- Error message -->
+    <div id="errorMessage" class="error hidden"></div>
+
+    <main class="content">
+      <!-- Sidebar: favorite cities -->
+      <aside class="sidebar">
+        <h2>⭐ Kota Favorit</h2>
+        <div id="favoritesList" class="favorites-list">
+          <p class="empty-text">Belum ada kota favorit</p>
+        </div>
+      </aside>
+
+      <section class="main-panels">
+        <!-- Current Weather -->
+        <section class="card current-weather">
+          <header class="card-header">
+            <div>
+              <h2 id="locationName">–</h2>
+              <p id="timestamp" class="timestamp">–</p>
+            </div>
+            <button id="favoriteBtn" class="favorite-btn" title="Simpan ke favorit">
+              ☆
+            </button>
+          </header>
+
+          <div class="current-body">
+            <div class="temp-block">
+              <span id="temperature" class="temp-value">–</span>
+              <span id="weatherDesc" class="weather-desc">–</span>
+            </div>
+            <div class="icon-block">
+              <img id="weatherIcon" alt="Weather icon" />
+            </div>
+          </div>
+
+          <div class="current-extra">
+            <div class="extra-item">
+              <span>Humidity</span>
+              <strong id="humidity">–</strong>
+            </div>
+            <div class="extra-item">
+              <span>Wind Speed</span>
+              <strong id="windSpeed">–</strong>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5-day Forecast -->
+        <section class="card forecast">
+          <header>
+            <h2>5-Day Forecast</h2>
+          </header>
+          <div id="forecastList" class="forecast-grid">
+            <!-- item forecast akan diisi lewat JS -->
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <small>
+        Data cuaca menggunakan
+        <strong>OpenWeather API</strong> (Current Weather & 5-Day Forecast).
+      </small>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
