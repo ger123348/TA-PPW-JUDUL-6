@@ -1,356 +1,143 @@
-// ========= KONFIGURASI DASAR =========
-const API_KEY = "17b9eed65198fdb631e8ad4fa012be46"; // ganti dengan API key OpenWeather kamu
-let currentCity = "Bandar Lampung";
-let currentUnit = "metric"; // metric = °C, imperial = °F
-let autoUpdateInterval = null;
+let citiesData = [];
+let currentCityName = null;
+let isCelsius = true;
+let favorites = [];
 
-// ========= ELEMENT DOM =========
-const cityInput = document.getElementById("cityInput");
-const searchBtn = document.getElementById("searchBtn");
-const unitToggle = document.getElementById("unitToggle");
-const themeToggle = document.getElementById("themeToggle");
-const refreshBtn = document.getElementById("refreshBtn");
-
-const loadingEl = document.getElementById("loading");
-const errorEl = document.getElementById("errorMessage");
-
-const locationNameEl = document.getElementById("locationName");
+const searchInput = document.getElementById("search-input");
+const suggestionsEl = document.getElementById("suggestions");
+const messageEl = document.getElementById("message");
+const currentCard = document.getElementById("current-card");
+const locationEl = document.getElementById("location");
 const timestampEl = document.getElementById("timestamp");
-const tempEl = document.getElementById("temperature");
-const descEl = document.getElementById("weatherDesc");
-const iconEl = document.getElementById("weatherIcon");
+const temperatureEl = document.getElementById("temperature");
+const conditionEl = document.getElementById("condition");
+const bigIconEl = document.getElementById("big-icon");
 const humidityEl = document.getElementById("humidity");
-const windEl = document.getElementById("windSpeed");
+const windEl = document.getElementById("wind");
+const forecastRow = document.getElementById("forecast-row");
+const favoritesRow = document.getElementById("favorites-row");
+const favBtn = document.getElementById("fav-btn");
+const themeToggle = document.getElementById("theme-toggle");
+const unitToggle = document.getElementById("unit-toggle");
+const refreshBtn = document.getElementById("refresh-btn");
+const loadingEl = document.getElementById("loading");
 
-const forecastListEl = document.getElementById("forecastList");
+function showLoading(show) { loadingEl.style.display = show ? "flex" : "none"; }
 
-const favoriteBtn = document.getElementById("favoriteBtn");
-const favoritesListEl = document.getElementById("favoritesList");
-
-// ========= UTILITAS =========
-function showLoading(show) {
-  loadingEl.classList.toggle("hidden", !show);
+async function loadData(initial = false) {
+  showLoading(true);
+  const res = await fetch("data.json");
+  const data = await res.json();
+  citiesData = data.cities;
+  if (initial) { loadFavorites(); selectCity(citiesData[0].name); }
+  else if (currentCityName) selectCity(currentCityName,false);
+  showLoading(false);
 }
 
-function showError(message = "") {
-  if (!message) {
-    errorEl.classList.add("hidden");
-    errorEl.textContent = "";
-  } else {
-    errorEl.classList.remove("hidden");
-    errorEl.textContent = message;
-  }
+function formatTime(){
+  return new Date().toLocaleString("id-ID",{weekday:"short",hour:"2-digit",minute:"2-digit"});
 }
 
-function formatTimestamp(dt, timezoneOffsetSec) {
-  // dt: unix detik, timezoneOffsetSec: offset dari API (detik)
-  const localMs = (dt + timezoneOffsetSec) * 1000;
-  const date = new Date(localMs);
-  return date.toLocaleString("id-ID", {
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
+function renderCurrent(city){
+  currentCityName = city.name;
+  currentCard.style.display = "block";
+  locationEl.textContent = city.name;
+  timestampEl.textContent = `Updated • ${formatTime()}`;
+
+  let temp = city.current.temperature;
+  if (!isCelsius) temp = Math.round((temp*9)/5+32);
+  temperatureEl.textContent = temp + "°";
+
+  bigIconEl.textContent = city.current.icon;
+  conditionEl.textContent = city.current.condition;
+  humidityEl.textContent = `Humidity ${city.current.humidity}%`;
+  windEl.textContent = `Wind ${city.current.wind} km/h`;
+
+  updateFavButton();
+  renderForecast(city);
+}
+
+function renderForecast(city){
+  forecastRow.innerHTML = "";
+  city.forecast.forEach(d=>{
+    forecastRow.innerHTML += `
+    <div class="forecast-item">
+      <div class="day">${d.day}</div>
+      <div class="f-icon">${mapConditionToIcon(d.condition)}</div>
+      <div class="range">${d.min}° / ${d.max}°</div>
+      <div class="desc">${d.condition}</div>
+    </div>`;
   });
 }
 
-function getUnitSymbol() {
-  return currentUnit === "metric" ? "°C" : "°F";
+function mapConditionToIcon(c){
+  const x = c.toLowerCase();
+  if(x.includes("cerah")||x.includes("sunny"))return "☀";
+  if(x.includes("cloud"))return "☁";
+  if(x.includes("rain"))return "🌧";
+  if(x.includes("storm"))return "⛈";
+  return "🌤";
 }
 
-// ========= FAVORIT (localStorage) =========
-function getFavorites() {
-  const raw = localStorage.getItem("favoriteCities");
-  if (!raw) return [];
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return [];
-  }
+function selectCity(name, updateInput=true){
+  const city = citiesData.find(c=>c.name.toLowerCase()===name.toLowerCase());
+  suggestionsEl.style.display="none"; messageEl.textContent="";
+  if(!city){ messageEl.textContent=`Tidak ada data untuk "${name}"`; return; }
+  if(updateInput) searchInput.value = city.name;
+  renderCurrent(city);
 }
 
-function saveFavorites(list) {
-  localStorage.setItem("favoriteCities", JSON.stringify(list));
-}
-
-function toggleFavorite(cityName) {
-  let favs = getFavorites();
-  const exists = favs.includes(cityName);
-
-  if (exists) {
-    favs = favs.filter((c) => c !== cityName);
-  } else {
-    favs.push(cityName);
-  }
-
-  saveFavorites(favs);
-  updateFavoriteButtonState();
-  renderFavorites();
-}
-
-function updateFavoriteButtonState() {
-  const favs = getFavorites();
-  if (favs.includes(currentCity)) {
-    favoriteBtn.classList.add("active");
-    favoriteBtn.textContent = "★";
-  } else {
-    favoriteBtn.classList.remove("active");
-    favoriteBtn.textContent = "☆";
-  }
-}
-
-function renderFavorites() {
-  const favs = getFavorites();
-  favoritesListEl.innerHTML = "";
-
-  if (favs.length === 0) {
-    const p = document.createElement("p");
-    p.className = "empty-text";
-    p.textContent = "Belum ada kota favorit";
-    favoritesListEl.appendChild(p);
+function renderSuggestions(text){
+  suggestionsEl.innerHTML="";
+  const q=text.trim().toLowerCase();
+  if(!q){ suggestionsEl.style.display="none"; return; }
+  const found = citiesData.filter(c=>c.name.toLowerCase().includes(q));
+  suggestionsEl.style.display="block";
+  if(!found.length){
+    suggestionsEl.innerHTML=`<div class="suggestion-item">Tidak ada kota.</div>`;
     return;
   }
-
-  favs.forEach((city) => {
-    const btn = document.createElement("button");
-    btn.className = "favorite-pill";
-    btn.textContent = city;
-    btn.addEventListener("click", () => {
-      currentCity = city;
-      cityInput.value = city;
-      fetchWeatherAndForecast();
-    });
-    favoritesListEl.appendChild(btn);
+  found.slice(0,6).forEach(c=>{
+    suggestionsEl.innerHTML+=`<div class="suggestion-item" onclick="selectCity('${c.name}')">${c.name}</div>`;
   });
 }
 
-// ========= API REQUEST =========
-async function fetchCurrentWeather(city) {
-  const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
-    city
-  )}&appid=${API_KEY}&units=${currentUnit}&lang=id`;
-
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`Gagal mengambil cuaca (status ${res.status})`);
-  }
-  return res.json();
-}
-
-async function fetchForecast(city) {
-  const url = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(
-    city
-  )}&appid=${API_KEY}&units=${currentUnit}&lang=id`;
-
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`Gagal mengambil forecast (status ${res.status})`);
-  }
-  return res.json();
-}
-
-// ========= RENDER KE UI =========
-function renderCurrentWeather(data) {
-  currentCity = data.name;
-
-  const temp = Math.round(data.main.temp);
-  const humidity = data.main.humidity;
-  const wind = data.wind.speed;
-  const desc = data.weather[0].description;
-  const icon = data.weather[0].icon;
-  const tzOffset = data.timezone; // detik
-  const dt = data.dt; // unix detik
-
-  locationNameEl.textContent = `${data.name}, ${data.sys.country}`;
-  timestampEl.textContent = `Terakhir update: ${formatTimestamp(
-    dt,
-    tzOffset
-  )}`;
-
-  tempEl.textContent = `${temp}${getUnitSymbol()}`;
-  descEl.textContent = desc;
-
-  humidityEl.textContent = `${humidity}%`;
-  windEl.textContent =
-    currentUnit === "metric" ? `${wind} m/s` : `${wind} mph`;
-
-  iconEl.src = `https://openweathermap.org/img/wn/${icon}@2x.png`;
-  iconEl.alt = desc;
-
-  updateFavoriteButtonState();
-}
-
-function renderForecast(data) {
-  // Data 5 hari ke depan, ambil dari list (3 jam sekali)
-  const list = data.list;
-  const byDate = {};
-
-  list.forEach((item) => {
-    const dateTxt = item.dt_txt.split(" ")[0]; // "YYYY-MM-DD"
-    if (!byDate[dateTxt]) {
-      byDate[dateTxt] = [];
-    }
-    byDate[dateTxt].push(item);
-  });
-
-  const dates = Object.keys(byDate).sort();
-
-  // Buang hari pertama kalau itu hari ini (supaya benar-benar 5 hari ke depan)
-  const today = new Date().toISOString().slice(0, 10);
-  const filteredDates = dates.filter((d) => d >= today).slice(0, 5);
-
-  forecastListEl.innerHTML = "";
-
-  filteredDates.forEach((dateStr) => {
-    const items = byDate[dateStr];
-    let minTemp = Infinity;
-    let maxTemp = -Infinity;
-    let chosenItem = items[0];
-
-    items.forEach((it) => {
-      if (it.main.temp_min < minTemp) minTemp = it.main.temp_min;
-      if (it.main.temp_max > maxTemp) maxTemp = it.main.temp_max;
-      // kalau jam 12:00, pakai itu untuk icon & deskripsi
-      if (it.dt_txt.includes("12:00:00")) {
-        chosenItem = it;
-      }
-    });
-
-    const desc = chosenItem.weather[0].description;
-    const icon = chosenItem.weather[0].icon;
-
-    const dateObj = new Date(dateStr);
-    const label = dateObj.toLocaleDateString("id-ID", {
-      weekday: "short",
-      day: "2-digit",
-      month: "short",
-    });
-
-    const card = document.createElement("div");
-    card.className = "forecast-item";
-    card.innerHTML = `
-      <div><strong>${label}</strong></div>
-      <img src="https://openweathermap.org/img/wn/${icon}.png" alt="${desc}">
-      <div style="text-transform: capitalize; margin-bottom:4px;">${desc}</div>
-      <div><strong>${Math.round(
-        maxTemp
-      )}${getUnitSymbol()}</strong> / ${Math.round(minTemp)}${getUnitSymbol()}</div>
-    `;
-
-    forecastListEl.appendChild(card);
-  });
-}
-
-// ========= FUNGSI UTAMA =========
-async function fetchWeatherAndForecast() {
-  showError("");
-  showLoading(true);
-
-  try {
-    const [current, forecast] = await Promise.all([
-      fetchCurrentWeather(currentCity),
-      fetchForecast(currentCity),
-    ]);
-
-    renderCurrentWeather(current);
-    renderForecast(forecast);
-    setupAutoUpdate(); // reset/update interval setiap kali kota diganti
-  } catch (err) {
-    console.error(err);
-    showError(err.message || "Terjadi kesalahan saat mengambil data cuaca.");
-  } finally {
-    showLoading(false);
-  }
-}
-
-function setupAutoUpdate() {
-  // clear interval lama
-  if (autoUpdateInterval) {
-    clearInterval(autoUpdateInterval);
-  }
-  // real-time update tiap 5 menit (300000 ms)
-  autoUpdateInterval = setInterval(() => {
-    fetchWeatherAndForecast();
-  }, 300000);
-}
-
-// ========= EVENT LISTENER =========
-
-// Search
-searchBtn.addEventListener("click", () => {
-  const value = cityInput.value.trim();
-  if (!value) return;
-  currentCity = value;
-  fetchWeatherAndForecast();
+searchInput.addEventListener("input",e=>renderSuggestions(e.target.value));
+searchInput.addEventListener("keydown",e=>{
+  if(e.key==="Enter") selectCity(searchInput.value.trim());
 });
 
-cityInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    searchBtn.click();
-  }
-});
-
-// Toggle unit C / F
-unitToggle.addEventListener("click", () => {
-  currentUnit = currentUnit === "metric" ? "imperial" : "metric";
-  unitToggle.classList.toggle("active");
-  unitToggle.textContent = currentUnit === "metric" ? "°C" : "°F";
-  fetchWeatherAndForecast();
-});
-
-// Toggle tema
-themeToggle.addEventListener("click", () => {
-  const body = document.body;
-  const isDark = body.classList.contains("dark");
-  if (isDark) {
-    body.classList.remove("dark");
-    body.classList.add("light");
-    themeToggle.textContent = "🌞 Light";
-  } else {
-    body.classList.remove("light");
-    body.classList.add("dark");
-    themeToggle.textContent = "🌙 Dark";
-  }
-  // Simpan preferensi
-  localStorage.setItem(
-    "theme",
-    body.classList.contains("dark") ? "dark" : "light"
-  );
-});
-
-// Refresh manual
-refreshBtn.addEventListener("click", () => {
-  fetchWeatherAndForecast();
-});
-
-// Favorite
-favoriteBtn.addEventListener("click", () => {
-  toggleFavorite(currentCity);
-});
-
-// ========= INISIALISASI =========
-function initTheme() {
-  const saved = localStorage.getItem("theme");
-  if (saved === "dark") {
-    document.body.classList.remove("light");
-    document.body.classList.add("dark");
-    themeToggle.textContent = "🌙 Dark";
-  } else {
-    document.body.classList.remove("dark");
-    document.body.classList.add("light");
-    themeToggle.textContent = "🌞 Light";
-  }
-}
-
-function init() {
-  initTheme();
+function loadFavorites(){
+  favorites = JSON.parse(localStorage.getItem("favCities"))||[];
   renderFavorites();
-  cityInput.value = currentCity;
-  unitToggle.textContent = "°C";
-  unitToggle.classList.add("active");
-  fetchWeatherAndForecast();
 }
 
-window.addEventListener("load", init);
+function saveFavorites(){
+  localStorage.setItem("favCities",JSON.stringify(favorites));
+}
+
+function toggleFavorite(){
+  const i=favorites.indexOf(currentCityName);
+  i===-1 ? favorites.push(currentCityName) : favorites.splice(i,1);
+  saveFavorites(); renderFavorites(); updateFavButton();
+}
+
+function updateFavButton(){
+  favBtn.textContent = favorites.includes(currentCityName) ? "★ Favorit" : "♡ Simpan";
+}
+
+function renderFavorites(){
+  favoritesRow.innerHTML="";
+  if(!favorites.length){ favoritesRow.textContent="Belum ada favorit."; return;}
+  favorites.forEach(n=>{
+    favoritesRow.innerHTML+=`<div class="fav-chip" onclick="selectCity('${n}')">${n}</div>`;
+  });
+}
+
+themeToggle.onclick = ()=>{ document.body.classList.toggle("light"); themeToggle.textContent=document.body.classList.contains("light")?"Dark":"Light"; };
+unitToggle.onclick = ()=>{ isCelsius=!isCelsius; unitToggle.textContent=isCelsius?"°C":"°F"; selectCity(currentCityName,false); };
+favBtn.onclick = toggleFavorite;
+refreshBtn.onclick = ()=>loadData(false);
+
+setInterval(()=>loadData(false),5*60*1000);
+loadData(true);
